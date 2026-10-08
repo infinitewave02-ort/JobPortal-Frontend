@@ -1,0 +1,26 @@
+buildscript {
+    ext {
+        buildToolsVersion = "34.0.0"
+        minSdkVersion = 24
+        compileSdkVersion = 36
+        targetSdkVersion = 34
+        ndkVersion = "27.1.12297006"
+        kotlinVersion = "2.1.21"
+        // KSP version must match kotlin version; used by @react-native-async-storage/async-storage
+        kspVersion = "2.1.21-2.0.2"
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.4.2'
+        classpath("com.android.tools.build:gradle")
+        classpath("com.facebook.react:react-native-gradle-plugin")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
+        // KSP needed by @react-native-async-storage/async-storage (Room database)
+        classpath("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.1.21-2.0.2")
+    }
+}
+
+apply plugin: "com.facebook.react.rootproject"

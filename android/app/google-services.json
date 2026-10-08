@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "307229663974",
+    "project_id": "job-portal-vijay",
+    "storage_bucket": "job-portal-vijay.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:307229663974:android:b7644469073cf7c4109127",
+        "android_client_info": {
+          "package_name": "com.infinite.jobportal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDapYnDfsBpfXiZYb2Oo2OMtpIXakRZi8c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

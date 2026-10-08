@@ -1,0 +1,125 @@
+import {StyleSheet} from 'react-native';
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    marginTop: 40,
+    backgroundColor: '#FFFFFF',
+    paddingBottom: 40,
+  },
+  header: {
+    height: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerButton: {
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+  },
+  title: {
+    textAlign: 'center',
+    fontSize: 26,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    marginTop: 10,
+  },
+  subtitle: {
+    textAlign: 'center',
+    fontSize: 15,
+    color: '#555555',
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1A1A1A',
+    marginBottom: 6,
+    marginTop: 16,
+  },
+  inputContainer: {
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.2,
+    borderColor: '#E8E8E8',
+    borderRadius: 8,
+    backgroundColor: '#FCFCFC',
+    paddingHorizontal: 12,
+  },
+  input: {
+    flex: 1,
+    height: 48,
+    padding: 0,
+    fontSize: 15,
+    color: '#222222',
+  },
+  iconContainer: {
+    padding: 4,
+  },
+  saveButton: {
+    height: 52,
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#3478DB',
+    borderRadius: 8,
+    marginTop: 30,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContainer: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    padding: 24,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1A1A1A',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalOption: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E8E8E8',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#1A1A1A',
+    textAlign: 'center',
+  },
+  modalCancelButton: {
+    paddingVertical: 16,
+    marginTop: 10,
+  },
+  modalCancelText: {
+    fontSize: 16,
+    color: '#E74C3C',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+});
+
+export default styles;
