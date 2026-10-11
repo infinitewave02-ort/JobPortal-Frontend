@@ -45,18 +45,19 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 12,
-    color: '#707070',
+    fontSize: 14,
+    color: '#4A4A4A',
     marginBottom: 8,
+    fontWeight: '400',
   },
   inputWithIcon: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#EFEFEF',
-    borderRadius: 8,
+    borderWidth: 1.2,
+    borderColor: '#E2E8F0',
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 2,
+    height: 54,
     backgroundColor: '#FFFFFF',
   },
   errorInput: {
@@ -64,9 +65,12 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 15,
     color: '#1A1A24',
+    paddingVertical: 0,
   },
+
+
   
   forgotText: {
     color: '#485ff4',
@@ -101,6 +105,17 @@ const styles = StyleSheet.create({
     color: '#A0A0A0',
   },
   
+  leftIcon: {
+    marginRight: 10,
+  },
+  eyeButton: {
+    padding: 6,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingVertical: 20,
+  },
   backButton: {
     position: 'absolute',
     top: 20,
@@ -111,3 +126,4 @@ const styles = StyleSheet.create({
 });
 
 export default styles;
+

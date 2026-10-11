@@ -36,16 +36,16 @@ const Profile = ({navigation, route}) => {
   const routeParams = route?.params || {};
   const fallbackData = routeParams.employeeData || routeParams;
 
-  const fullName           = employeeProfile?.fullName           || fallbackData.fullName           || 'User Name';
-  const jobTitle           = employeeProfile?.jobTitle           || fallbackData.jobTitle           || 'Add Job Title';
+  const fullName           = employeeProfile?.fullName           || employeeProfile?.name           || fallbackData.fullName           || fallbackData.name           || 'User Name';
+  const jobTitle           = employeeProfile?.jobTitle           || employeeProfile?.role           || fallbackData.jobTitle           || fallbackData.role           || 'Add Job Title';
   const email              = employeeProfile?.email              || fallbackData.email              || 'Not provided';
   const phone              = employeeProfile?.phone              || fallbackData.phone              || 'Not provided';
-  const currentLocation    = employeeProfile?.currentLocation    || fallbackData.currentLocation    || 'Location not set';
+  const currentLocation    = employeeProfile?.currentLocation    || employeeProfile?.location       || fallbackData.currentLocation    || fallbackData.location       || 'Location not set';
   const preferredLocation  = employeeProfile?.preferredLocation  || fallbackData.preferredLocation  || 'Not provided';
-  const qualification      = employeeProfile?.qualification      || fallbackData.qualification      || 'Not provided';
+  const qualification      = employeeProfile?.qualification      || employeeProfile?.education      || fallbackData.qualification      || fallbackData.education      || 'Not provided';
   const skills             = employeeProfile?.skills             || fallbackData.skills             || '';
-  const experience         = employeeProfile?.experience         || fallbackData.experience         || 'Not provided';
-  const expectedSalary     = employeeProfile?.expectedSalary     || fallbackData.expectedSalary     || 'Not provided';
+  const experience         = employeeProfile?.experience         || employeeProfile?.exp            || fallbackData.experience         || fallbackData.exp            || 'Not provided';
+  const expectedSalary     = employeeProfile?.expectedSalary     || employeeProfile?.salary         || fallbackData.expectedSalary     || fallbackData.salary         || 'Not provided';
   const noticePeriod       = employeeProfile?.noticePeriod       || fallbackData.noticePeriod       || 'Not provided';
   const gender             = employeeProfile?.gender             || fallbackData.gender             || 'Not provided';
   const resumeFile         = employeeProfile?.resumeFile         || fallbackData.resumeFile         || null;

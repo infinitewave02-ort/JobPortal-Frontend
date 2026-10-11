@@ -12,28 +12,55 @@ const EmployerProfileView = ({ navigation, route }) => {
   // Fetch profile from backend every time screen is focused
   useFocusEffect(
     useCallback(() => {
+      let isMounted = true;
       const fetchProfile = async () => {
+        let mergedUser = {};
         try {
           const { getMe } = require('../../services/authService');
           const res = await getMe();
-          const resUser = res?.data?.data || res?.data?.user || res?.data;
-          if (resUser && typeof resUser === 'object' && typeof updateEmployerProfile === 'function') {
-            updateEmployerProfile(resUser);
+          const resUser = res?.data?.data || res?.data?.user || res?.data || {};
+          if (resUser && typeof resUser === 'object') {
+            mergedUser = { ...mergedUser, ...resUser };
           }
-        } catch (e) {
-          console.warn('Failed to fetch employer profile:', e.message);
+        } catch (meErr) {
+          console.warn('Failed to fetch user in EmployerProfileView:', meErr.message);
+        }
+
+        try {
+          const { getCompanyProfile } = require('../../services/employerService');
+          const companyRes = await getCompanyProfile();
+          const companyData = companyRes?.data?.data || companyRes?.data || companyRes;
+          if (companyData && typeof companyData === 'object') {
+            mergedUser = { ...mergedUser, ...companyData };
+          }
+        } catch (companyErr) {
+          console.warn('Failed to fetch company details:', companyErr.message);
+        }
+
+        if (isMounted && Object.keys(mergedUser).length > 0 && typeof updateEmployerProfile === 'function') {
+          updateEmployerProfile(mergedUser);
         }
       };
       fetchProfile();
+      return () => { isMounted = false; };
     }, [updateEmployerProfile])
   );
 
   const companyName = employerProfile?.companyName || routeParams.companyName || 'Company Name';
   const industryType = employerProfile?.industryType || routeParams.industryType || 'Not specified';
-  const contactPerson = employerProfile?.contactPerson || routeParams.contactPerson || 'Not specified';
-  const companyEmail = employerProfile?.companyEmail || routeParams.companyEmail || 'Not specified';
-  const contactNumber = employerProfile?.contactNumber || routeParams.contactNumber || 'Not specified';
-  const address = employerProfile?.address || routeParams.address || 'Not specified';
+  const contactPerson = employerProfile?.contactPerson || employerProfile?.name || routeParams.contactPerson || routeParams.name || 'Not specified';
+  const companyEmail = employerProfile?.companyEmail || employerProfile?.email || routeParams.companyEmail || routeParams.email || 'Not specified';
+  const contactNumber = employerProfile?.contactNumber || employerProfile?.phone || routeParams.contactNumber || routeParams.phone || 'Not specified';
+  const address = 
+    employerProfile?.address || 
+    routeParams.address || 
+    employerProfile?.companyAddress || 
+    routeParams.companyAddress || 
+    'Not specified';
+  const location = 
+    employerProfile?.location || 
+    routeParams.location || 
+    '';
   const website = employerProfile?.website || routeParams.website || 'Not specified';
 
   return (
@@ -77,6 +104,13 @@ const EmployerProfileView = ({ navigation, route }) => {
           <Text style={styles.label}>Address</Text>
           <Text style={styles.value}>{address}</Text>
         </View>
+
+        {location ? (
+          <View style={styles.section}>
+            <Text style={styles.label}>Location</Text>
+            <Text style={styles.value}>{location}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.section}>
           <Text style={styles.label}>Website</Text>

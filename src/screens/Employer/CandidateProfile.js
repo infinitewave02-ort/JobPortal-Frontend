@@ -84,7 +84,15 @@ const CandidateProfile = ({ navigation, route }) => {
 
       {/* Sticky Bottom Actions */}
       <View style={styles.stickyFooter}>
-        <TouchableOpacity style={styles.messageBtn} onPress={() => navigation.navigate('MessageCandidate', { candidateName: name, candidateRole: role })}>
+        <TouchableOpacity 
+          style={styles.messageBtn} 
+          onPress={() => navigation.navigate('MessageCandidate', { 
+            candidateId: candidate?.id || candidate?.uid || candidate?.userId || candidate?.email,
+            candidateName: name, 
+            candidateRole: role,
+            candidate
+          })}
+        >
           <Ionicons name="chatbubble-outline" size={20} color="#FFFFFF" />
           <Text style={styles.messageBtnText}>Message</Text>
         </TouchableOpacity>

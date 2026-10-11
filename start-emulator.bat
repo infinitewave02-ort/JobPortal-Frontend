@@ -1,0 +1,3 @@
+@echo off
+echo Starting Pixel_5 Android Emulator (Cold Boot)...
+"%LOCALAPPDATA%\Android\Sdk\emulator\emulator.exe" -avd Pixel_5 -no-snapshot-load

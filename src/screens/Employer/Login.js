@@ -78,6 +78,16 @@ const EmployerLogin = ({ navigation }) => {
         if (resUser && typeof resUser === 'object') {
           userData = { ...userData, ...resUser };
         }
+        try {
+          const { getCompanyProfile } = require('../../services/employerService');
+          const companyRes = await getCompanyProfile();
+          const companyData = companyRes?.data?.data || companyRes?.data || companyRes;
+          if (companyData && typeof companyData === 'object') {
+            userData = { ...userData, ...companyData };
+          }
+        } catch (companyErr) {
+          console.warn('Get employer profile warning:', companyErr.message);
+        }
       } catch (err) {
         console.warn('Get employer profile warning:', err.message);
       }

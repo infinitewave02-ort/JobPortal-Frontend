@@ -7,14 +7,22 @@ import { useEmployer } from '../../context/EmployerContext';
 const EmployerDashboard = ({ navigation, route }) => {
   const { employerProfile } = useEmployer();
   const routeParams = route?.params || {};
+  const employerData = routeParams.employerData || {};
 
   // Context takes priority; fall back to route params
-  const companyName = employerProfile?.companyName || routeParams.companyName || 'Company';
-  const contactPerson = employerProfile?.contactPerson || routeParams.contactPerson || 'User';
-  const industryType = employerProfile?.industryType || routeParams.industryType || '';
-  const companyEmail = employerProfile?.companyEmail || routeParams.companyEmail || '';
-  const contactNumber = employerProfile?.contactNumber || routeParams.contactNumber || '';
-  const address = employerProfile?.address || routeParams.address || '';
+  const companyName = employerProfile?.companyName || employerData?.companyName || routeParams.companyName || 'Company';
+  const contactPerson = employerProfile?.contactPerson || employerData?.contactPerson || routeParams.contactPerson || 'User';
+  const industryType = employerProfile?.industryType || employerData?.industryType || routeParams.industryType || '';
+  const companyEmail = employerProfile?.companyEmail || employerData?.companyEmail || routeParams.companyEmail || '';
+  const contactNumber = employerProfile?.contactNumber || employerData?.contactNumber || routeParams.contactNumber || '';
+  const address = 
+    employerProfile?.address || 
+    employerData?.address || 
+    routeParams.address || 
+    employerProfile?.companyAddress || 
+    employerData?.companyAddress || 
+    routeParams.companyAddress || 
+    '';
 
   const cNameWords = companyName.split(' ');
   const primaryAvatarText = cNameWords[0].substring(0, 3).toUpperCase();

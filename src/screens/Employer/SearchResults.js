@@ -18,8 +18,10 @@ const SearchResults = ({ navigation, route }) => {
   const fetchCandidates = async () => {
     setLoading(true);
     try {
-      const res = await getCandidates();
-      if (res && res.data && Array.isArray(res.data.data)) {
+      const res = await getCandidates({ q: query });
+      if (res && res.data && res.data.data && Array.isArray(res.data.data.candidates)) {
+        setLiveCandidates(res.data.data.candidates);
+      } else if (res && res.data && Array.isArray(res.data.data)) {
         setLiveCandidates(res.data.data);
       } else if (res && res.data && Array.isArray(res.data.candidates)) {
         setLiveCandidates(res.data.candidates);
@@ -37,7 +39,7 @@ const SearchResults = ({ navigation, route }) => {
   const combined = [...liveCandidates];
   if (contextEmployees && Array.isArray(contextEmployees)) {
     contextEmployees.forEach(ce => {
-      const exists = combined.some(c => c.id === ce.id || c.email === ce.email);
+      const exists = combined.some(c => (c.id && c.id === ce.id) || (c.uid && c.uid === ce.uid) || (c.email && c.email === ce.email));
       if (!exists) {
         combined.push(ce);
       }
@@ -49,7 +51,8 @@ const SearchResults = ({ navigation, route }) => {
     const q = query.toLowerCase();
     const nameMatch = (c.fullName || c.name || '').toLowerCase().includes(q);
     const roleMatch = (c.jobTitle || c.role || '').toLowerCase().includes(q);
-    const skillsMatch = (c.skills || '').toLowerCase().includes(q);
+    const skillsText = Array.isArray(c.skills) ? c.skills.join(' ') : (c.skills || '');
+    const skillsMatch = skillsText.toLowerCase().includes(q);
     return nameMatch || roleMatch || skillsMatch;
   });
 

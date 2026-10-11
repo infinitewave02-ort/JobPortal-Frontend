@@ -9,6 +9,7 @@ import auth, {
 } from '@react-native-firebase/auth';
 
 export const registerEmployee = (data) => api.post('/api/auth/register', data);
+export const registerEmployer = (data) => api.post('/api/auth/register/employer', data);
 export const syncUser = (data) => api.post('/api/auth/sync', data);
 export const getMe = () => api.get(`/api/auth/me?t=${new Date().getTime()}`);
 
@@ -32,6 +33,18 @@ export const getAuthInstance = () => {
   return auth;
 };
 
+export const getCurrentUser = () => {
+  try {
+    const a = getAuthInstance();
+    if (a?.currentUser) return a.currentUser;
+    if (typeof a === 'function') {
+      const ins = a();
+      if (ins?.currentUser) return ins.currentUser;
+    }
+  } catch (e) {}
+  return null;
+};
+
 export const loginUser = async (email, password) => {
   const authInstance = getAuthInstance();
   let userCredential;
@@ -46,6 +59,9 @@ export const loginUser = async (email, password) => {
 
   const idToken = await userCredential.user.getIdToken();
   await AsyncStorage.setItem('userToken', idToken);
+  if (userCredential.user?.uid) {
+    await AsyncStorage.setItem('userUid', userCredential.user.uid);
+  }
   return userCredential.user;
 };
 
@@ -63,6 +79,9 @@ export const registerUser = async (email, password) => {
 
   const idToken = await userCredential.user.getIdToken();
   await AsyncStorage.setItem('userToken', idToken);
+  if (userCredential.user?.uid) {
+    await AsyncStorage.setItem('userUid', userCredential.user.uid);
+  }
   return userCredential.user;
 };
 
@@ -99,5 +118,22 @@ export const changePassword = async (newPassword) => {
   if (!user) throw new Error('No user is currently signed in');
   return await user.updatePassword(newPassword);
 };
+
+export const loginWithCustomToken = async (customToken) => {
+  const authInstance = getAuthInstance();
+  let userCredential = null;
+  if (typeof authInstance?.signInWithCustomToken === 'function') {
+    userCredential = await authInstance.signInWithCustomToken(customToken);
+  } else if (typeof auth === 'function' && typeof auth().signInWithCustomToken === 'function') {
+    userCredential = await auth().signInWithCustomToken(customToken);
+  }
+  if (userCredential?.user) {
+    const idToken = await userCredential.user.getIdToken();
+    await AsyncStorage.setItem('userToken', idToken);
+    return userCredential.user;
+  }
+  return null;
+};
+
 
 

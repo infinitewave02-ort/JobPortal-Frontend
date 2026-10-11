@@ -73,7 +73,14 @@ const CompleteProfile = ({navigation, route}) => {
       });
 
       // 1. Register user in backend
-      await registerEmployee(allData);
+      const regRes = await registerEmployee(allData);
+      console.log('✅ Employee registered successfully on backend:', regRes?.data || allData.email);
+
+      // Save to context and persistence immediately so profile data is never blank!
+      const registeredUser = regRes?.data?.data || regRes?.data || {};
+      if (typeof updateEmployeeProfile === 'function') {
+        updateEmployeeProfile({ ...allData, ...registeredUser });
+      }
 
       // 2. Try to log them in to Firebase
       try {
@@ -82,21 +89,17 @@ const CompleteProfile = ({navigation, route}) => {
         console.warn('Firebase login warning after registration:', authError.message || authError);
       }
 
-      // 3. Try to fetch profile and update context
+      // 3. Try to fetch profile and update context with backend record
       try {
         if (typeof updateEmployeeProfile === 'function') {
           const response = await getMe();
           const resUser = response?.data?.data || response?.data?.user || response?.data;
           if (resUser) {
             updateEmployeeProfile(resUser);
-          } else {
-            updateEmployeeProfile(allData);
           }
         }
       } catch (fetchErr) {
-        if (typeof updateEmployeeProfile === 'function') {
-          updateEmployeeProfile(allData);
-        }
+        // Ignored as we already populated profile from registration
       }
       
       navigation.navigate('UploadResume', allData);

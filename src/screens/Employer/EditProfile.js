@@ -24,11 +24,12 @@ const EditEmployerProfile = ({ navigation }) => {
   // Load actual user data instead of hardcoded strings
   const [companyName, setCompanyName] = useState(employerProfile?.companyName || '');
   const [industry, setIndustry] = useState(employerProfile?.industryType || '');
-  const [location, setLocation] = useState(employerProfile?.address || '');
+  const [address, setAddress] = useState(employerProfile?.address || employerProfile?.companyAddress || '');
+  const [location, setLocation] = useState(employerProfile?.location || '');
   const [website, setWebsite] = useState(employerProfile?.website || '');
-  const [contactPerson, setContactPerson] = useState(employerProfile?.contactPerson || '');
-  const [email, setEmail] = useState(employerProfile?.companyEmail || '');
-  const [contactNumber, setContactNumber] = useState(employerProfile?.contactNumber || '');
+  const [contactPerson, setContactPerson] = useState(employerProfile?.contactPerson || employerProfile?.name || '');
+  const [email, setEmail] = useState(employerProfile?.companyEmail || employerProfile?.email || '');
+  const [contactNumber, setContactNumber] = useState(employerProfile?.contactNumber || employerProfile?.phone || '');
   const [companyLogo, setCompanyLogo] = useState(employerProfile?.companyLogo || null);
   const [isIndustryModalVisible, setIsIndustryModalVisible] = useState(false);
   
@@ -112,23 +113,27 @@ const EditEmployerProfile = ({ navigation }) => {
       ...employerProfile,
       companyName,
       industryType: industry,
-      address: location,
+      address,
+      location,
       website,
       contactPerson,
       companyEmail: email,
       contactNumber,
       companyLogo
     };
+    delete updatedData.companyAddress;
 
     try {
       const { updateCompanyProfile } = require('../../services/employerService');
       await updateCompanyProfile({
         companyName,
         industryType: industry,
-        address: location,
+        address,
+        location,
         website,
         contactPerson,
         contactNumber,
+        companyEmail: email,
       });
     } catch (err) {
       console.log('Backend profile sync note:', err.message);
@@ -192,8 +197,13 @@ const EditEmployerProfile = ({ navigation }) => {
         </View>
 
         <View style={styles.inputGroup}>
+          <Text style={styles.label}>Address</Text>
+          <TextInput style={styles.input} value={address} onChangeText={setAddress} placeholder="Company Street Address" />
+        </View>
+
+        <View style={styles.inputGroup}>
           <Text style={styles.label}>Location</Text>
-          <TextInput style={styles.input} value={location} onChangeText={setLocation} placeholder="Company Location" />
+          <TextInput style={styles.input} value={location} onChangeText={setLocation} placeholder="City (e.g. New York, Denver)" />
         </View>
 
         <View style={styles.inputGroup}>

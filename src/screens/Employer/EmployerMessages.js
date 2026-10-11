@@ -1,96 +1,214 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, SafeAreaView, StatusBar, ScrollView } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+  RefreshControl,
+  ActivityIndicator
+} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../../styles/Employer/EmployerMessages';
 import { useEmployer } from '../../context/EmployerContext';
+import { getCurrentUser } from '../../services/authService';
+import { getConversations } from '../../services/messageService';
 
 const EmployerMessages = ({ navigation }) => {
   const { employerProfile } = useEmployer();
   const [activeTab, setActiveTab] = useState('All');
-  const [messages] = useState([]); // Will be populated from API in future
+  const [searchQuery, setSearchQuery] = useState('');
+  const [conversations, setConversations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const unreadMessages = messages.filter(m => m.unread);
-  const displayedMessages = activeTab === 'Unread' ? unreadMessages : messages;
+  const fetchEmployerConversations = useCallback(async (isRefresh = false) => {
+    try {
+      if (!isRefresh) setLoading(true);
+      const currentUser = getCurrentUser();
+      const storedUid = await AsyncStorage.getItem('userUid');
+      const uid = currentUser?.uid || storedUid || employerProfile?.uid || employerProfile?.userId || 'employer_user';
+      const res = await getConversations({ userId: uid });
+      const data = res?.data?.data || res?.data || [];
+      if (Array.isArray(data)) {
+        setConversations(data);
+      }
+    } catch (err) {
+      console.warn('Error fetching employer conversations:', err?.message || err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [employerProfile]);
+
+  useEffect(() => {
+    fetchEmployerConversations();
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchEmployerConversations(true);
+    });
+    return unsubscribe;
+  }, [navigation, fetchEmployerConversations]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchEmployerConversations(true);
+  };
+
+  const unreadMessages = conversations.filter(m => (m.unread || 0) > 0);
+  const baseList = activeTab === 'Unread' ? unreadMessages : conversations;
+
+  const filteredConversations = baseList.filter(item => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase().trim();
+    const nameMatch = (item.name || '').toLowerCase().includes(q);
+    const msgMatch = (item.preview || item.msg || '').toLowerCase().includes(q);
+    const roleMatch = (item.role || '').toLowerCase().includes(q);
+    return nameMatch || msgMatch || roleMatch;
+  });
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      
+
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A24" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Messages</Text>
+        <View style={styles.headerTopRow}>
+          {navigation.canGoBack() && (
+            <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <Ionicons name="arrow-back" size={24} color="#111827" />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.headerTitle}>Messages</Text>
+          <TouchableOpacity onPress={() => fetchEmployerConversations(false)}>
+            <Ionicons name="refresh-outline" size={22} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search input */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search-outline" size={18} color="#9CA3AF" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search conversations..."
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')}>
+              <Ionicons name="close-circle" size={16} color="#9CA3AF" />
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
+      {/* Tabs */}
       <View style={styles.tabsRow}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, activeTab === 'All' && styles.activeTab]}
           onPress={() => setActiveTab('All')}
         >
-          <Text style={[styles.tabText, activeTab === 'All' && styles.activeTabText]}>All ({messages.length})</Text>
+          <Text style={[styles.tabText, activeTab === 'All' && styles.activeTabText]}>
+            All ({conversations.length})
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={[styles.tab, activeTab === 'Unread' && styles.activeTab]}
           onPress={() => setActiveTab('Unread')}
         >
-          <Text style={[styles.tabText, activeTab === 'Unread' && styles.activeTabText]}>Unread ({unreadMessages.length})</Text>
+          <Text style={[styles.tabText, activeTab === 'Unread' && styles.activeTabText]}>
+            Unread ({unreadMessages.length})
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <ScrollView contentContainerStyle={styles.listContainer} showsVerticalScrollIndicator={false}>
-        {displayedMessages.length > 0 ? displayedMessages.map((msg) => (
-          <TouchableOpacity 
-            key={msg.id} 
-            style={styles.messageRow}
-            onPress={() => navigation.navigate('MessageCandidate')}
-            activeOpacity={0.7}
-          >
-            <View style={styles.avatar} />
-            <View style={styles.msgInfo}>
-              <View style={styles.nameTimeRow}>
-                <Text style={styles.name}>{msg.name}</Text>
-                <Text style={styles.time}>{msg.time}</Text>
-              </View>
-              <View style={styles.msgPreviewRow}>
-                <Text style={styles.msgPreview} numberOfLines={1}>{msg.preview}</Text>
-                {msg.unread && <View style={styles.unreadDot} />}
-              </View>
-            </View>
-          </TouchableOpacity>
-        )) : (
+      {/* Conversations list */}
+      <ScrollView
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#4361EE']} />}
+      >
+        {loading && conversations.length === 0 ? (
           <View style={{ alignItems: 'center', marginTop: 60 }}>
-            <FeatherIcon name="message-square" size={48} color="#D1D1D1" />
-            <Text style={{ color: '#888', marginTop: 12, fontSize: 16, fontWeight: '600' }}>
-              No {activeTab === 'Unread' ? 'unread messages' : 'messages'} yet
+            <ActivityIndicator size="small" color="#4361EE" />
+            <Text style={{ color: '#888', marginTop: 10 }}>Loading conversations...</Text>
+          </View>
+        ) : filteredConversations.length > 0 ? (
+          filteredConversations.map((msg) => (
+            <TouchableOpacity
+              key={msg.id || msg.conversationId}
+              style={styles.messageRow}
+              onPress={() =>
+                navigation.navigate('MessageCandidate', {
+                  candidateId: msg.otherUserId,
+                  candidateName: msg.name,
+                  candidateRole: msg.role || 'Applicant',
+                  currentUserRole: 'employer'
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <View style={styles.avatarWrapper}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>
+                    {(msg.name || 'C').charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+                <View style={styles.onlineBadge} />
+              </View>
+
+              <View style={styles.msgInfo}>
+                <View style={styles.nameTimeRow}>
+                  <Text style={styles.name} numberOfLines={1}>{msg.name}</Text>
+                  <Text style={styles.time}>{msg.time}</Text>
+                </View>
+                {Boolean(msg.role) && (
+                  <Text style={styles.roleText} numberOfLines={1}>
+                    {msg.role.toLowerCase() === 'employee' ? 'Candidate' : msg.role.toLowerCase() === 'employer' ? 'Employer' : msg.role}
+                  </Text>
+                )}
+                <View style={styles.msgPreviewRow}>
+                  <Text style={styles.msgPreview} numberOfLines={1}>
+                    {msg.preview || msg.msg || 'Tap to view conversation'}
+                  </Text>
+                  {msg.unread > 0 ? (
+                    <View style={styles.unreadDot}>
+                      <Text style={styles.unreadBadgeText}>{msg.unread}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              </View>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconContainer}>
+              <FeatherIcon name="message-square" size={38} color="#9CA3AF" />
+            </View>
+            <Text style={styles.emptyTitle}>
+              {searchQuery ? 'No matching conversations' : `No ${activeTab === 'Unread' ? 'unread messages' : 'messages'} yet`}
             </Text>
-            <Text style={{ color: '#AAAAAA', marginTop: 6, fontSize: 13, textAlign: 'center', paddingHorizontal: 30 }}>
-              Messages from candidates will appear here.
+            <Text style={styles.emptySubtitle}>
+              {searchQuery
+                ? 'Try a different keyword to find conversations.'
+                : 'Connect with candidates and initiate chat discussions regarding opportunities.'}
             </Text>
+            {!searchQuery && (
+              <TouchableOpacity
+                style={styles.emptyButton}
+                onPress={() => navigation.navigate('SearchCandidates')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.emptyButtonText}>Find Candidates</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>
-
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate({ name: 'EmployerDashboard', merge: true })}>
-          <Ionicons name="home-outline" size={24} color="#A0A0A0" />
-          <Text style={[styles.navLabel, { color: '#A0A0A0' }]}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('SearchCandidates')}>
-          <Ionicons name="search-outline" size={24} color="#A0A0A0" />
-          <Text style={[styles.navLabel, { color: '#A0A0A0' }]}>Search</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="chatbubble-ellipses" size={24} color="#485ff4" />
-          <Text style={[styles.navLabel, { color: '#485ff4' }]}>Messages</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate({ name: 'EmployerProfileView', params: { ...employerProfile }, merge: true })}>
-          <Ionicons name="person-outline" size={24} color="#A0A0A0" />
-          <Text style={[styles.navLabel, { color: '#A0A0A0' }]}>Profile</Text>
-        </TouchableOpacity>
-      </View>
-
     </SafeAreaView>
   );
 };

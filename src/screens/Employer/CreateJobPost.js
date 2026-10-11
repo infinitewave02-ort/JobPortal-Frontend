@@ -20,30 +20,37 @@ const CreateJobPost = ({ navigation }) => {
       Alert.alert('Error', 'Please fill in all mandatory fields.');
       return;
     }
+
+    const numericUserId = typeof employerProfile?.userId === 'number' 
+      ? employerProfile.userId 
+      : (typeof employerProfile?.uid === 'number' 
+          ? employerProfile.uid 
+          : (!isNaN(Number(employerProfile?.userId)) ? Number(employerProfile.userId) : (!isNaN(Number(employerProfile?.uid)) ? Number(employerProfile.uid) : undefined)));
+
     const jobData = {
-       title: jobTitle,
-       location: location,
-       salary: salary,
-       description: description,
+       title: jobTitle.trim(),
+       location: location.trim(),
+       salary: salary.trim(),
+       description: description.trim(),
        company: employerProfile?.companyName || 'Unknown Company',
+       companyName: employerProfile?.companyName || 'Unknown Company',
        posted: new Date().toLocaleDateString(),
-       employerEmail: employerProfile?.companyEmail || '',
+       employerEmail: employerProfile?.companyEmail || employerProfile?.email || '',
+       ...(numericUserId !== undefined ? { userId: numericUserId, employerId: numericUserId } : {})
     };
     
     setLoading(true);
     try {
-      await createJob(jobData);
-      addJob(jobData);
+      const res = await createJob(jobData);
+      const savedJob = res?.data?.data || res?.data || jobData;
+      addJob(savedJob);
       Alert.alert('Success', 'Job posted successfully!', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (err) {
-      console.warn('Backend job post note:', err.message);
-      // Ensure local admin context is still updated even if backend fails
-      addJob(jobData);
-      Alert.alert('Success', 'Job posted successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      console.error('Backend job post error:', err.response?.data || err.message);
+      const errorMsg = err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to post job.';
+      Alert.alert('Error Posting Job', errorMsg);
     } finally {
       setLoading(false);
     }
@@ -106,8 +113,16 @@ const CreateJobPost = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handlePostJob}>
-          <Text style={styles.buttonText}>Post Job</Text>
+        <TouchableOpacity 
+          style={[styles.button, loading && { opacity: 0.7 }]} 
+          onPress={handlePostJob}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>Post Job</Text>
+          )}
         </TouchableOpacity>
 
       </ScrollView>

@@ -10,19 +10,34 @@ export const EmployerProvider = ({ children }) => {
     companyEmail: '',
     contactNumber: '',
     address: '',
+    location: '',
     website: '',
   });
 
   const updateEmployerProfile = useCallback((data) => {
-    // Full replacement — prevent stale data from previous sessions bleeding through
-    setEmployerProfile({
-      companyName: data.companyName || '',
-      industryType: data.industryType || '',
-      contactPerson: data.contactPerson || '',
-      companyEmail: data.companyEmail || '',
-      contactNumber: data.contactNumber || '',
-      address: data.address || '',
-      website: data.website || '',
+    if (!data || typeof data !== 'object') return;
+    setEmployerProfile((prev) => {
+      const resolvedAddress = 
+        data.address !== undefined && data.address !== null
+          ? data.address 
+          : (data.companyAddress !== undefined ? data.companyAddress : prev.address);
+      const resolvedLocation = 
+        data.location !== undefined && data.location !== null 
+          ? data.location 
+          : prev.location;
+
+      return {
+        ...prev,
+        ...data,
+        companyName: data.companyName !== undefined ? data.companyName : prev.companyName,
+        industryType: data.industryType !== undefined ? data.industryType : prev.industryType,
+        contactPerson: data.contactPerson !== undefined ? data.contactPerson : (data.name !== undefined ? data.name : prev.contactPerson),
+        companyEmail: data.companyEmail !== undefined ? data.companyEmail : (data.email !== undefined ? data.email : prev.companyEmail),
+        contactNumber: data.contactNumber !== undefined ? data.contactNumber : (data.phone !== undefined ? data.phone : prev.contactNumber),
+        address: resolvedAddress,
+        location: resolvedLocation,
+        website: data.website !== undefined ? data.website : prev.website,
+      };
     });
   }, []);
 
@@ -34,6 +49,7 @@ export const EmployerProvider = ({ children }) => {
       companyEmail: '',
       contactNumber: '',
       address: '',
+      location: '',
       website: '',
     });
   }, []);

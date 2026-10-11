@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, SafeAreaView, StatusBar, ScrollView, Alert, Modal } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import auth from '@react-native-firebase/auth';
-import { syncUser, registerUser } from '../../services/authService';
+import { syncUser, registerUser, registerEmployer, loginUser } from '../../services/authService';
 import styles from '../../styles/Employer/CompanyDetails';
 import { useEmployer } from '../../context/EmployerContext';
 import { AdminContext } from '../../context/AdminContext';
@@ -24,6 +24,8 @@ const CompanyDetails = ({ navigation }) => {
   const [address, setAddress] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isIndustryModalVisible, setIndustryModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -61,10 +63,52 @@ const CompanyDetails = ({ navigation }) => {
     setLoading(true);
 
     try {
-      await registerUser(companyEmail, password);
+      const payload = {
+        companyName: companyName.trim(),
+        industryType: industryType.trim(),
+        contactPerson: contactPerson.trim(),
+        companyEmail: companyEmail.trim(),
+        contactNumber: contactNumber.trim(),
+        address: address.trim(),
+        password,
+        role: 'employer'
+      };
+
+      try {
+        await registerEmployer(payload);
+      } catch (regErr) {
+        console.warn('registerEmployer warning:', regErr.message);
+      }
+
+      // Login to get token with numeric UID
+      try {
+        await loginUser(companyEmail.trim(), password);
+      } catch (loginErr) {
+        await registerUser(companyEmail.trim(), password);
+      }
       
-      const profileData = { companyName, industryType, contactPerson, companyEmail, contactNumber, address };
-      await syncUser({ role: 'employer', companyName, contactPerson });
+      const profileData = { 
+        companyName: companyName.trim(), 
+        industryType: industryType.trim(), 
+        contactPerson: contactPerson.trim(), 
+        companyEmail: companyEmail.trim(), 
+        contactNumber: contactNumber.trim(), 
+        address: address.trim()
+      };
+
+      await syncUser({ 
+        role: 'employer', 
+        companyName: companyName.trim(), 
+        contactPerson: contactPerson.trim(), 
+        name: contactPerson.trim(), 
+        phone: contactNumber.trim(), 
+        companyEmail: companyEmail.trim(),
+        address: address.trim()
+      });
+      
+      const { updateCompanyProfile } = require('../../services/employerService');
+      await updateCompanyProfile(profileData);
+
       updateEmployerProfile(profileData);
       navigation.navigate('CompanyProfile', profileData);
     } catch (err) {
@@ -153,22 +197,50 @@ const CompanyDetails = ({ navigation }) => {
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={[styles.input, errors.password && styles.errorInput]}
-            value={password}
-            onChangeText={(text) => { setPassword(text); setErrors(prev => ({...prev, password: null})); }}
-            secureTextEntry
-          />
+          <View style={[styles.inputWithIcon, errors.password && styles.errorInput]}>
+            <TextInput
+              style={styles.inputText}
+              value={password}
+              onChangeText={(text) => { setPassword(text); setErrors(prev => ({...prev, password: null})); }}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity 
+              onPress={() => setShowPassword(!showPassword)}
+              activeOpacity={0.7}
+              style={styles.eyeIcon}
+            >
+              <Ionicons 
+                name={showPassword ? "eye-outline" : "eye-off-outline"} 
+                size={20} 
+                color="#7A7A7A" 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Confirm Password</Text>
-          <TextInput
-            style={[styles.input, errors.confirmPassword && styles.errorInput]}
-            value={confirmPassword}
-            onChangeText={(text) => { setConfirmPassword(text); setErrors(prev => ({...prev, confirmPassword: null})); }}
-            secureTextEntry
-          />
+          <View style={[styles.inputWithIcon, errors.confirmPassword && styles.errorInput]}>
+            <TextInput
+              style={styles.inputText}
+              value={confirmPassword}
+              onChangeText={(text) => { setConfirmPassword(text); setErrors(prev => ({...prev, confirmPassword: null})); }}
+              secureTextEntry={!showConfirmPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity 
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              activeOpacity={0.7}
+              style={styles.eyeIcon}
+            >
+              <Ionicons 
+                name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} 
+                size={20} 
+                color="#7A7A7A" 
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <TouchableOpacity 

@@ -13,14 +13,18 @@ import styles from '../../styles/Employer/ResumePreview';
 import useViewResume from '../../hooks/useViewResume';
 
 const ResumePreview = ({ navigation, route }) => {
-  const { candidateName = 'Candidate Name', candidateRole = 'Job Role', candidate = {} } = route?.params || {};
+  const params = route?.params || {};
+  const candidate = params.candidate || {};
+  const candidateName = params.candidateName || candidate.name || candidate.fullName || 'Candidate';
+  const candidateRole = params.candidateRole || candidate.role || candidate.jobTitle || 'Job Seeker';
 
-  const hasPdf = !!candidate.resumeFile;
-  const fileName = candidate.resumeFile?.name || `${candidateName}_Resume.pdf`;
+  const resumeFile = candidate.resumeFile || params.resumeFile || params.resume || (params.uri ? { uri: params.uri, name: params.fileName || params.resumeName } : null);
+  const hasPdf = !!resumeFile;
+  const fileName = (typeof resumeFile === 'object' && resumeFile?.name) ? resumeFile.name : `${candidateName}_Resume.pdf`;
 
   const { isLoading, progress, openResume } = useViewResume();
 
-  const handleOpenPdf = () => openResume(candidate.resumeFile || null);
+  const handleOpenPdf = () => openResume(resumeFile || null);
 
   return (
     <SafeAreaView style={styles.safeArea}>

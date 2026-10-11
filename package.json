@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
+    "emulator": "\"%LOCALAPPDATA%/Android/Sdk/emulator/emulator.exe\" -avd Pixel_5 -no-snapshot-load",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "start": "react-native start",

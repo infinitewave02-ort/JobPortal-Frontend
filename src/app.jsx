@@ -49,9 +49,11 @@ import ManageJobs from './screens/Admin/ManageJobs';
 import ReportsAnalytics from './screens/Admin/ReportsAnalytics';
 import OpenToWork from './screens/Admin/OpenToWork';
 import TotalResumes from './screens/Admin/TotalResumes';
+import AdminProfile from './screens/Admin/AdminProfile';
 import { AdminProvider } from './context/AdminContext';
 import { EmployeeProvider } from './context/EmployeeContext';
 import { EmployerProvider } from './context/EmployerContext';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -151,8 +153,10 @@ const AdminTabs = () => (
     <Tab.Screen name="ReportsAnalytics" component={ReportsAnalytics} />
     <Tab.Screen name="OpenToWork" component={OpenToWork} />
     <Tab.Screen name="TotalResumes" component={TotalResumes} />
+    <Tab.Screen name="AdminProfile" component={AdminProfile} />
   </Tab.Navigator>
 );
+
 
 const App = () => {
   return (
@@ -177,6 +181,8 @@ const App = () => {
           <Stack.Screen name="SearchResults" component={SearchResults} />
           <Stack.Screen name="CandidateProfile" component={CandidateProfile} />
           <Stack.Screen name="MessageCandidate" component={MessageCandidate} />
+          <Stack.Screen name="Chat" component={MessageCandidate} />
+          <Stack.Screen name="EmployeeChat" component={MessageCandidate} />
           <Stack.Screen name="CallCandidate" component={CallCandidate} />
           <Stack.Screen name="ResumePreview" component={ResumePreview} />
           <Stack.Screen name="CreateJobPost" component={CreateJobPost} />
@@ -196,6 +202,8 @@ const App = () => {
           <Stack.Screen name="EditEmployerProfile" component={EditEmployerProfile} />
           <Stack.Screen name="EmployerLogin" component={EmployerLogin} />
           <Stack.Screen name="AdminLogin" component={AdminLogin} />
+          <Stack.Screen name="AdminProfile" component={AdminProfile} />
+
 
           {/* Alias Screens mapping to Tabs so existing navigate('Jobs') goes to the Tab */}
           <Stack.Screen name="Jobs" component={EmployeeTabs} />

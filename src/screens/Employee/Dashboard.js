@@ -18,10 +18,10 @@ const Dashboard = ({navigation, route}) => {
   const routeParams = route?.params || {};
 
   // Context takes priority; fall back to route params (for first-time navigation)
-  const fullName = employeeProfile?.fullName || routeParams.fullName;
-  const jobTitle = employeeProfile?.jobTitle || routeParams.jobTitle;
-  const experience = employeeProfile?.experience || routeParams.experience;
-  const currentLocation = employeeProfile?.currentLocation || routeParams.currentLocation;
+  const fullName = employeeProfile?.fullName || employeeProfile?.name || routeParams.fullName || routeParams.name;
+  const jobTitle = employeeProfile?.jobTitle || employeeProfile?.role || routeParams.jobTitle || routeParams.role;
+  const experience = employeeProfile?.experience || employeeProfile?.exp || routeParams.experience || routeParams.exp;
+  const currentLocation = employeeProfile?.currentLocation || employeeProfile?.location || routeParams.currentLocation || routeParams.location;
 
   const [isOpenToWork, setIsOpenToWork] = useState(true);
 
